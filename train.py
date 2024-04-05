@@ -6,7 +6,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 data_df = pd.read_parquet('preprocessed_data.parquet', engine='pyarrow')
 data_df.info()
 # Create a TensorFlow Dataset
-def df_to_tfdata(df, batch_size=32):
+def df_to_tfdata(df, batch_size=16):
     dataset = tf.data.Dataset.from_tensor_slices((
         {
             'input_ids': list(df['input_ids']),
