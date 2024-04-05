@@ -43,3 +43,12 @@ pip freeze > requirements.txt
 Since your dataset is in JSON format, you can use pandas to easily load it. We'll load both the training and test datasets.
 
 Before moving on to tokenization, it's crucial to understand your data, especially the distribution of PII types.
+
+## Env setup on linux
+
+```
+python3 -m pip install tensorflow
+pip install pandas numpy tqdm pyarrow
+pip install transformers
+
+```

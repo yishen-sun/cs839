@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "5" 
 data_df = pd.read_parquet('preprocessed_data.parquet', engine='pyarrow')
 data_df.info()
 # Create a TensorFlow Dataset
