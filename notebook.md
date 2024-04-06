@@ -48,7 +48,7 @@ Before moving on to tokenization, it's crucial to understand your data, especial
 
 ```
 python3 -m pip install tensorflow
-pip install pandas numpy tqdm pyarrow
+pip install pandas numpy tqdm pyarrow scikit-learn seqeval
 pip install transformers
 pip install tf-keras
 ```
