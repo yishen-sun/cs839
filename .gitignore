@@ -1,3 +1,5 @@
 train.json
 test.json
 segments.parquet
+logs
+docker/logs

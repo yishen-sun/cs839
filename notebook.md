@@ -3,7 +3,7 @@
 Create a new environment named pii_detection and install Python. Replace x.x with the Python version you want to use (e.g., 3.8 or 3.9):
 
 ```
-conda create --name pii_detection python=x.x
+conda create --name pii_detection python=3.9
 ```
 
 Activate the environment:
