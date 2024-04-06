@@ -4,6 +4,25 @@ import pandas as pd
 import tensorflow as tf
 import datetime
 
+label_map = {
+    'O' : 0,
+    'B-NAME_STUDENT': 1,
+    'I-NAME_STUDENT': 2, 
+    'B-URL_PERSONAL': 3, 
+    'I-URL_PERSONAL': 4, 
+    'B-ID_NUM': 5, 
+    'I-ID_NUM': 6,
+    'B-EMAIL': 7, 
+    'I-EMAIL': 8,
+    'B-STREET_ADDRESS': 9, 
+    'I-STREET_ADDRESS': 10,
+    'B-PHONE_NUM': 11, 
+    'I-PHONE_NUM': 12, 
+    'B-USERNAME': 13,
+    'I-USERNAME': 14,
+}
+reverse_label_map = {v: k for k, v in label_map.items()}
+
 def df_to_tfdata(df, batch_size=16):
     dataset = tf.data.Dataset.from_tensor_slices((
         {
@@ -66,8 +85,8 @@ filename = f"result_file_{timestamp}.txt"
 with open(filename, 'w') as file:
     # Write the scores for each label to the file
     for i, label_id in enumerate(labels):
-        print(f"Label {label_id} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}")
-        file.write(f"Label {label_id} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}\n")
+        print(f"Label {reverse_label_map[label_id]} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}")
+        file.write(f"Label {reverse_label_map[label_id]} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}\n")
     
     # Calculate unweighted (macro) averages
     average_precision = np.mean(precision)
