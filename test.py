@@ -2,6 +2,7 @@ from transformers import TFBertForTokenClassification
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import datetime
 
 def df_to_tfdata(df, batch_size=16):
     dataset = tf.data.Dataset.from_tensor_slices((
@@ -54,17 +55,32 @@ def calculate_metrics(true_labels, predicted_labels, labels):
 # true_labels, predicted_labels should be flattened lists of labels for tokens where the corresponding attention_mask is 1
 labels = list(range(1, 15))
 precision, recall, f1, f5 = calculate_metrics(filtered_true_labels, filtered_predicted_labels, labels)
-# Print the scores for each label
-for i, label_id in enumerate(labels):
-    print(f"Label {label_id} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}")
 
-# Calculate unweighted (macro) averages
-average_precision = np.mean(precision)
-average_recall = np.mean(recall)
-average_f1 = np.mean(f1)
-average_f5 = np.mean(f5)
+# Get the current date and time as a string in the format "YYYYMMDD_HHMMSS"
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-print(f"Average Precision: {average_precision}")
-print(f"Average Recall: {average_recall}")
-print(f"Average F1: {average_f1}")
-print(f"Average F5: {average_f5}")
+# Append the timestamp to the filename
+filename = f"result_file_{timestamp}.txt"
+
+# Open a file with the timestamped name to write the results
+with open(filename, 'w') as file:
+    # Write the scores for each label to the file
+    for i, label_id in enumerate(labels):
+        print(f"Label {label_id} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}")
+        file.write(f"Label {label_id} - Precision: {precision[i]}, Recall: {recall[i]}, F1: {f1[i]}, F5: {f5[i]}\n")
+    
+    # Calculate unweighted (macro) averages
+    average_precision = np.mean(precision)
+    average_recall = np.mean(recall)
+    average_f1 = np.mean(f1)
+    average_f5 = np.mean(f5)
+    
+    print(f"Average Precision: {average_precision}")
+    print(f"Average Recall: {average_recall}")
+    print(f"Average F1: {average_f1}")
+    print(f"Average F5: {average_f5}")
+    # Write the average scores to the file
+    file.write(f"Average Precision: {average_precision}\n")
+    file.write(f"Average Recall: {average_recall}\n")
+    file.write(f"Average F1: {average_f1}\n")
+    file.write(f"Average F5: {average_f5}\n")
