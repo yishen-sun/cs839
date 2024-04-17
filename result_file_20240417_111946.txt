@@ -1,0 +1,18 @@
+Label B-NAME_STUDENT - Precision: 0.9090909090909091, Recall: 0.9935897435897436, F1: 0.9494640122511485, F5: 0.990050362363346
+Label I-NAME_STUDENT - Precision: 0.8466666666666667, Recall: 0.9548872180451128, F1: 0.8975265017667844, F5: 0.9502158273381295
+Label B-URL_PERSONAL - Precision: 1.0, Recall: 1.0, F1: 1.0, F5: 1.0
+Label I-URL_PERSONAL - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label B-ID_NUM - Precision: 1.0, Recall: 0.84, F1: 0.9130434782608696, F5: 0.8452012383900929
+Label I-ID_NUM - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label B-EMAIL - Precision: 1.0, Recall: 0.7, F1: 0.8235294117647058, F5: 0.708171206225681
+Label I-EMAIL - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label B-STREET_ADDRESS - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label I-STREET_ADDRESS - Precision: 0.4090909090909091, Recall: 1.0, F1: 0.5806451612903226, F5: 0.9473684210526315
+Label B-PHONE_NUM - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label I-PHONE_NUM - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label B-USERNAME - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Label I-USERNAME - Precision: 0.0, Recall: 0.0, F1: 0.0, F5: nan
+Average Precision: 0.3689177489177489
+Average Recall: 0.39203406868820406
+Average F1: 0.368872040380988
+Average F5: nan
