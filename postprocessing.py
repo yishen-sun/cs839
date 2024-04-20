@@ -49,9 +49,9 @@ for batch in test_dataset.unbatch():  # Iterate over each batch in the dataset
     all_attention_masks.append(batch[0]['attention_mask'].numpy())  # Assuming attention_mask is part of the input dict
 
 data = {
-    'all_predicted_labels': all_predicted_labels,
-    'all_true_labels': all_true_labels,
-    'all_attention_masks': all_attention_masks
+    'all_predicted_labels': pd.Series(all_predicted_labels),
+    'all_true_labels': pd.Series(all_true_labels),
+    'all_attention_masks': pd.Series(all_attention_masks)
 }
 data_df = pd.DataFrame(data)
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
