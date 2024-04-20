@@ -23,41 +23,55 @@ label_map = {
 }
 reverse_label_map = {v: k for k, v in label_map.items()}
 
-def df_to_tfdata(df, batch_size=16):
-    dataset = tf.data.Dataset.from_tensor_slices((
-        {
-            'input_ids': list(df['input_ids']),
-            'attention_mask': list(df['attention_mask'])
-        },
-        list(df['numeric_labels'])
-    ))
-    dataset = dataset.batch(batch_size)
-    return dataset
 
-model = TFBertForTokenClassification.from_pretrained("my_pii_detection_model", num_labels=15)
-
-test_df = pd.read_parquet('test_data.parquet', engine='pyarrow')
-test_df.info()
-test_dataset = df_to_tfdata(test_df)
-predictions = model.predict(test_dataset)  # Assuming test_dataset is already prepared
-predicted_label_indices = np.argmax(predictions.logits, axis=-1)
-
-true_labels = []
-attention_masks = []
-for batch in test_dataset.unbatch():  # Iterate over each batch in the dataset
-    true_labels.append(batch[1].numpy())  # Assuming the second element of the batch is numeric_labels
-    attention_masks.append(batch[0]['attention_mask'].numpy())  # Assuming attention_mask is part of the input dict
+data_df = pd.read_parquet('predicted_results.parquet', engine='pyarrow')
+all_predicted_labels = list(data_df['all_predicted_labels'])
+all_true_labels = list(data_df['all_true_labels'])
+all_attention_masks = list(data_df['all_attention_masks'])
+aggregated_predicted_labels = []
+aggregated_true_labels = []
+aggregated_attention_masks = []
+for i, index_mapping in enumerate(test_df['index_mappings']):
+    length = max(index_mapping) + 1
+    predicted_labels = [0] * length
+    true_labels = [0] * length
+    attention_masks = [1] * length
+    for j, index in enumerate(index_mapping):
+        if index < 0:
+            continue
+        if true_labels[index] == 0:
+            true_labels[index] = all_true_labels[i][j]
+            predicted_labels[index] = all_predicted_labels[i][j]
+            attention_masks[index] = all_attention_masks[i][j]
+    aggregated_predicted_labels.append(predicted_labels)
+    aggregated_true_labels.append(true_labels)
+    aggregated_attention_masks.append(attention_masks)
+# print(f"all_predicted_labels size {len(all_predicted_labels)}")
+# print(f"all_true_labels size {len(all_true_labels)}")
+# print(f"all_attention_masks size {len(all_attention_masks)}")
+# print(f"all_predicted_labels[0] size {len(all_predicted_labels[0])}")
+# print(f"all_true_labels[0] size {len(all_true_labels[0])}")
+# print(f"all_attention_masks[0] size {len(all_attention_masks[0])}")
+# print(f"all_predicted_labels[0] {all_predicted_labels[0]}")
+# print(f"all_true_labels[0] {all_true_labels[0]}")
+# print(f"all_attention_masks[0] {all_attention_masks[0]}")
+# print(f"aggregated_predicted_labels[0] size {len(aggregated_predicted_labels[0])}")
+# print(f"aggregated_true_labels[0] size {len(aggregated_true_labels[0])}")
+# print(f"aggregated_attention_masks[0] size {len(aggregated_attention_masks[0])}")
+# print(f"aggregated_predicted_labels[0] {aggregated_predicted_labels[0]}")
+# print(f"aggregated_true_labels[0] {aggregated_true_labels[0]}")
+# print(f"aggregated_attention_masks[0] {aggregated_attention_masks[0]}")
 # Flatten the lists
-true_labels = [label for sublist in true_labels for label in sublist]
-attention_masks = [mask for sublist in attention_masks for mask in sublist]
-predicted_labels_flat = [label for sublist in predicted_label_indices for label in sublist]
+aggregated_true_labels = [label for sublist in aggregated_true_labels for label in sublist]
+aggregated_attention_masks = [mask for sublist in aggregated_attention_masks for mask in sublist]
+aggregated_predicted_labels = [label for sublist in aggregated_predicted_labels for label in sublist]
 # Filter Based on Attention Masks
-filtered_true_labels = []
-filtered_predicted_labels = []
-for i in range(len(attention_masks)):
-    if attention_masks[i] == 1:  # If the token is not a padding token
-        filtered_true_labels.append(true_labels[i])
-        filtered_predicted_labels.append(predicted_labels_flat[i])
+# filtered_true_labels = []
+# filtered_predicted_labels = []
+# for i in range(len(attention_masks)):
+#     if attention_masks[i] == 1:  # If the token is not a padding token
+#         filtered_true_labels.append(aggregated_true_labels[i])
+#         filtered_predicted_labels.append(aggregated_predicted_labels[i])
 
 from sklearn.metrics import precision_score, recall_score, f1_score
 
@@ -73,7 +87,7 @@ def calculate_metrics(true_labels, predicted_labels, labels):
 # You'll need to preprocess your predictions and true_labels to filter out padding based on attention masks and flatten them for sklearn metrics
 # true_labels, predicted_labels should be flattened lists of labels for tokens where the corresponding attention_mask is 1
 labels = list(range(1, 15))
-precision, recall, f1, f5 = calculate_metrics(filtered_true_labels, filtered_predicted_labels, labels)
+precision, recall, f1, f5 = calculate_metrics(aggregated_true_labels, aggregated_predicted_labels, labels)
 
 # Get the current date and time as a string in the format "YYYYMMDD_HHMMSS"
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
