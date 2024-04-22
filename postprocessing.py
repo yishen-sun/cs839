@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import datetime
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" 
 label_map = {
     'O' : 0,
     'B-NAME_STUDENT': 1,
@@ -41,18 +42,27 @@ test_df.info()
 test_dataset = df_to_tfdata(test_df)
 predictions = model.predict(test_dataset)  # Assuming test_dataset is already prepared
 
-all_predicted_labels = np.argmax(predictions.logits, axis=-1)
+all_predicted_labels = []
 all_true_labels = []
 all_attention_masks = []
-for batch in test_dataset.unbatch():  # Iterate over each batch in the dataset
-    all_true_labels.append(batch[1].numpy())  # Assuming the second element of the batch is numeric_labels
-    all_attention_masks.append(batch[0]['attention_mask'].numpy())  # Assuming attention_mask is part of the input dict
-
+all_predicted_labels = np.argmax(predictions['logits'], axis=-1).tolist()
+i = 0
+for (input_dict, true_labels) in test_dataset.unbatch().as_numpy_iterator():
+    all_true_labels.append(true_labels.tolist())  # Appends the true labels of the batch
+    all_attention_masks.append(input_dict['attention_mask'].tolist())  # Appends the attention masks of the batch
 data = {
-    'all_predicted_labels': pd.Series(all_predicted_labels),
-    'all_true_labels': pd.Series(all_true_labels),
-    'all_attention_masks': pd.Series(all_attention_masks)
+    'all_predicted_labels': all_predicted_labels,
+    'all_true_labels': all_true_labels,
+    'all_attention_masks': all_attention_masks
 }
+# Print the length of each sublist to check consistency
+print(len(all_predicted_labels))
+print(len(all_true_labels))
+print(len(all_attention_masks))
+for i, (pl, tl, am) in enumerate(zip(all_predicted_labels, all_true_labels, all_attention_masks)):
+    if len(pl) != 512 or len(tl) != 512 or len(am) != 512:
+        print(f"Row {i} lengths -- Predicted: {len(pl)}, True: {len(tl)}, Masks: {len(am)}")
+
 data_df = pd.DataFrame(data)
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 data_df.to_parquet(f'predicted_results_{timestamp}.parquet', engine='pyarrow')

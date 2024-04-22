@@ -24,13 +24,14 @@ label_map = {
 reverse_label_map = {v: k for k, v in label_map.items()}
 
 
-data_df = pd.read_parquet('predicted_results.parquet', engine='pyarrow')
+data_df = pd.read_parquet('predicted_results_20240421_100936.parquet', engine='pyarrow')
 all_predicted_labels = list(data_df['all_predicted_labels'])
 all_true_labels = list(data_df['all_true_labels'])
 all_attention_masks = list(data_df['all_attention_masks'])
 aggregated_predicted_labels = []
 aggregated_true_labels = []
 aggregated_attention_masks = []
+test_df = pd.read_parquet('test_data.parquet', engine='pyarrow')
 for i, index_mapping in enumerate(test_df['index_mappings']):
     length = max(index_mapping) + 1
     predicted_labels = [0] * length
