@@ -3,3 +3,4 @@ test.json
 segments.parquet
 logs
 docker/logs
+train_data_text_file.txt
