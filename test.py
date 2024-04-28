@@ -75,20 +75,42 @@ aggregated_predicted_labels = [label for sublist in aggregated_predicted_labels 
 #         filtered_predicted_labels.append(aggregated_predicted_labels[i])
 
 from sklearn.metrics import precision_score, recall_score, f1_score
-
 def calculate_metrics(true_labels, predicted_labels, labels):
     precision = precision_score(true_labels, predicted_labels, average=None, labels=labels)
     recall = recall_score(true_labels, predicted_labels, average=None, labels=labels)
     f1 = f1_score(true_labels, predicted_labels, average=None, labels=labels)
     # Custom F5 calculation
-    f5 = (1 + 5**2) * (precision * recall) / ((5**2 * precision) + recall)
+    f5 = (1 + 5**2) * (precision * recall) / ((5**2 * precision) + recall + 1)
+    number = np.asarray(true_labels).shape
     
+    return precision, recall, f1, f5
+
+# Calculate weighted averages
+def calculate_metrics_weighted(true_labels, predicted_labels, labels):
+    precision = precision_score(true_labels, predicted_labels, average='weighted', labels=labels)
+    recall = recall_score(true_labels, predicted_labels, average='weighted', labels=labels)
+    f1 = f1_score(true_labels, predicted_labels, average='weighted', labels=labels)
+    # Custom F5 calculation
+    f5 = (1 + 5**2) * (precision * recall) / ((5**2 * precision) + recall + 1)
+
+    return precision, recall, f1, f5
+
+def calculate_metrics_micro(true_labels, predicted_labels, labels):
+    precision = precision_score(true_labels, predicted_labels, average='micro', labels=labels)
+    recall = recall_score(true_labels, predicted_labels, average='micro', labels=labels)
+    f1 = f1_score(true_labels, predicted_labels, average='micro', labels=labels)
+    # Custom F5 calculation
+    f5 = (1 + 5**2) * (precision * recall) / ((5**2 * precision) + recall + 1)
+
     return precision, recall, f1, f5
 
 # You'll need to preprocess your predictions and true_labels to filter out padding based on attention masks and flatten them for sklearn metrics
 # true_labels, predicted_labels should be flattened lists of labels for tokens where the corresponding attention_mask is 1
 labels = list(range(1, 15))
 precision, recall, f1, f5 = calculate_metrics(aggregated_true_labels, aggregated_predicted_labels, labels)
+
+w_pre, w_recall, w_f1, w_f5 = calculate_metrics_weighted(aggregated_true_labels, aggregated_predicted_labels, labels)
+micro_pre, micro_recall, micro_f1, micro_f5 = calculate_metrics_micro(aggregated_true_labels, aggregated_predicted_labels, labels)
 
 # Get the current date and time as a string in the format "YYYYMMDD_HHMMSS"
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -109,12 +131,31 @@ with open(filename, 'w') as file:
     average_f1 = np.mean(f1)
     average_f5 = np.mean(f5)
     
-    print(f"Average Precision: {average_precision}")
-    print(f"Average Recall: {average_recall}")
-    print(f"Average F1: {average_f1}")
-    print(f"Average F5: {average_f5}")
-    # Write the average scores to the file
-    file.write(f"Average Precision: {average_precision}\n")
-    file.write(f"Average Recall: {average_recall}\n")
-    file.write(f"Average F1: {average_f1}\n")
-    file.write(f"Average F5: {average_f5}\n")
+    
+    
+    # print(f"Average Precision: {average_precision}")
+    # print(f"Average Recall: {average_recall}")
+    # print(f"Average F1: {average_f1}")
+    # print(f"Average F5: {average_f5}")
+    # # Write the average scores to the file
+    # file.write(f"Average Precision: {average_precision}\n")
+    # file.write(f"Average Recall: {average_recall}\n")
+    # file.write(f"Average F1: {average_f1}\n")
+    # file.write(f"Average F5: {average_f5}\n")
+    
+    print(f"weighted Precision: {w_pre}")
+    print(f"weighted Recall: {w_recall}")
+    print(f"weighted F1: {w_f1}")
+    print(f"weighted F5: {w_f5}")
+    
+    file.write(f"{16_5e-5}\n")
+    file.write(f"Average weighted Precision: {w_pre}\n")
+    file.write(f"Average weighted Recall: {w_recall}\n")
+    file.write(f"Average weighted F1: {w_f1}\n")
+    file.write(f"Average weighted F5: {w_f5}\n")
+    
+    file.write(f"Micro Precision: {micro_pre}\n")
+    file.write(f"Micro Recall: {micro_recall}\n")
+    file.write(f"Micro F1: {micro_f1}\n")
+    file.write(f"Micro F5: {micro_f5}\n")
+

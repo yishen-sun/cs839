@@ -2,7 +2,8 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "5" 
+import matplotlib.pyplot as plt
+os.environ["CUDA_VISIBLE_DEVICES"] = "2" 
 train_df = pd.read_parquet('train_data.parquet', engine='pyarrow')
 train_df.info()
 test_df = pd.read_parquet('test_data.parquet', engine='pyarrow')
@@ -50,7 +51,8 @@ early_stopping_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', p
 model_history = model.fit(
     train_dataset,
     epochs=3,
-    callbacks=[tensorboard_callback, early_stopping_callback]
+    callbacks=[tensorboard_callback, early_stopping_callback],
+    validation_data=validation_dataset  # added
 )
 
 # validation_loss, validation_accuracy = model.evaluate(validation_dataset)
@@ -65,3 +67,40 @@ model.save_pretrained("my_pii_detection_model")
 tokenizer.save_pretrained("my_pii_detection_model")
 
 print("Model saved")
+history = model_history.history
+
+batch_size = 16
+learning_rate = 5e-5
+num_epoch = 3
+
+# Assuming `model_history` is the result from the `model.fit` method
+history = model_history.history
+
+with open('learning_cruve{}_{}'.format(batch_size, learning_rate), 'w') as file:
+    file.write(f"Average weighted acc {history['accuracy']}\n")
+    file.write(f"Average weighted val_acc: {history['val_accuracy']}\n")
+
+# Plotting training and validation accuracy
+x = list(range(1, num_epoch + 1))
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.plot(x, history['accuracy'], label='Train Accuracy')
+plt.plot(x, history['val_accuracy'], label='Validation Accuracy')
+plt.xticks(np.arange(min(x), max(x)+1, 1.0))
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(loc='lower right')
+
+# Plotting training and validation loss
+plt.subplot(1, 2, 2)
+plt.plot(x, history['loss'], label='Train Loss')
+plt.plot(x, history['val_loss'], label='Validation Loss')
+plt.xticks(np.arange(min(x), max(x)+1, 1.0))
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(loc='upper right')
+
+plt.show()
+plt.savefig('learning curve{}_{}.png'.format(batch_size, learning_rate), dpi=400)
